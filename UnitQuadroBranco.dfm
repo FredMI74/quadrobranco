@@ -15,6 +15,12 @@ object FrmQuadroBranco: TFrmQuadroBranco
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
+  object Shape1: TShape
+    Left = 296
+    Top = 256
+    Width = 65
+    Height = 65
+  end
   object PagQuadroBranco: TPageControl
     Left = 0
     Top = 0
@@ -622,30 +628,43 @@ object FrmQuadroBranco: TFrmQuadroBranco
     end
     object BtnAbrir: TButton
       Left = 5
-      Top = 2
+      Top = 1
       Width = 75
       Height = 20
       Caption = 'Abrir'
       TabOrder = 0
+      TabStop = False
       OnClick = BtnAbrirClick
     end
     object BtnSair: TButton
-      Left = 167
-      Top = 2
+      Left = 248
+      Top = 1
       Width = 75
       Height = 20
       Caption = 'Sair'
       TabOrder = 1
+      TabStop = False
       OnClick = BtnSairClick
     end
     object BtnApresentar: TButton
       Left = 86
-      Top = 2
+      Top = 1
       Width = 75
       Height = 20
       Caption = 'Apresentar'
       TabOrder = 2
+      TabStop = False
       OnClick = BtnApresentarClick
+    end
+    object BtnMinimizar: TButton
+      Left = 167
+      Top = 1
+      Width = 75
+      Height = 20
+      Caption = 'Minimizar'
+      TabOrder = 3
+      TabStop = False
+      OnClick = BtnMinimizarClick
     end
   end
   object OpenDialog: TOpenDialog
