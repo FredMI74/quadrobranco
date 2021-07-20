@@ -10,23 +10,24 @@ uses
 type
   TFrmQuadroBranco = class(TForm)
     PagQuadroBranco: TPageControl;
-    TabConteudo: TTabSheet;
-    Panel1: TPanel;
-    MemoConteudo: TMemo;
     OpenDialog: TOpenDialog;
-    BtnAbrir: TButton;
-    BtnSair: TButton;
-    BtnApresentar: TButton;
-    Image1: TImage;
-    BtnMinimizar: TButton;
-    Shape1: TShape;
-    procedure BtnApresentarClick(Sender: TObject);
-    procedure BtnSairClick(Sender: TObject);
-    procedure BtnAbrirClick(Sender: TObject);
+    PopupMenu: TPopupMenu;
+    Abrir1: TMenuItem;
+    Apresentar1: TMenuItem;
+    Minimizar1: TMenuItem;
+    N1: TMenuItem;
+    Sair1: TMenuItem;
+    MemoConteudo: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure proximoLabel(Sender: TObject);
     procedure proximoTab(Sender: TObject);
-    procedure BtnMinimizarClick(Sender: TObject);
+    procedure Abrir1Click(Sender: TObject);
+    procedure Apresentar1Click(Sender: TObject);
+    procedure Minimizar1Click(Sender: TObject);
+    procedure Sair1Click(Sender: TObject);
+    procedure Apresentar;
+    procedure WMEraseBkgnd(var Message: TWMEraseBkgnd);
+      message WM_ERASEBKGND;
   private
     { Private declarations }
     arquivo : string;
@@ -41,12 +42,17 @@ implementation
 
 {$R *.dfm}
 
-procedure TFrmQuadroBranco.BtnAbrirClick(Sender: TObject);
+procedure TFrmQuadroBranco.WMEraseBkgnd(var Message: TWMEraseBkgnd);
+begin
+  Message.Result:=0;
+end;
+
+procedure TFrmQuadroBranco.Abrir1Click(Sender: TObject);
 begin
   if OpenDialog.Execute then
   begin
       arquivo := OpenDialog.FileName;
-      BtnApresentar.Click;
+      Apresentar;
   end
   else
   begin
@@ -54,7 +60,12 @@ begin
   end;
 end;
 
-procedure TFrmQuadroBranco.BtnApresentarClick(Sender: TObject);
+procedure TFrmQuadroBranco.Apresentar1Click(Sender: TObject);
+begin
+  Apresentar;
+end;
+
+procedure TFrmQuadroBranco.Apresentar;
 var
   i : integer;
   linha : String;
@@ -63,6 +74,7 @@ var
   llabel : Tlabel;
   nextLabel : TButton;
   t : integer;
+  Panel : Tpanel;
 begin
    if arquivo <> '' then
    begin
@@ -72,9 +84,9 @@ begin
      Image := TImage.Create(self);
      i := 0;
 
-     while PagQuadroBranco.PageCount > 1 do
+     while PagQuadroBranco.PageCount > 0 do
        PagQuadroBranco.Pages[PagQuadroBranco.PageCount - 1].Free;
-     for linha in MemoConteudo.Lines do
+     for linha in  MemoConteudo.Lines do
      begin
          if not linha.IsEmpty  then
          begin
@@ -84,18 +96,30 @@ begin
               TabSheet := TTabSheet.Create(PagQuadroBranco);
               TabSheet.Caption := Copy(linha,2,linha.Length);
               TabSheet.PageControl := PagQuadroBranco;
-              TabSheet.DoubleBuffered := true;
-              Image := TImage.Create(PagQuadroBranco);
-              Image.Parent := TabSheet;
+              //TabSheet.TabVisible := False;
+              Panel :=  Tpanel.Create(TabSheet);
+              Panel.DoubleBuffered := true;
+              Panel.Caption := '';
+              Panel.Align := alClient;
+              Panel.Parent :=  TabSheet;
+              Image := TImage.Create(Panel);
+              Image.Parent := Panel;
               Image.Align := alClient;
-              Image.Stretch := True;
-              Image.Picture := Image1.Picture;
+              Image.Picture.LoadFromFile('D:\QuadroBranco\fundo.png');
               Image.OnClick := proximoLabel;
           end
           else
           begin
               if linha.StartsWith('IM') then
               begin
+                Panel :=  Tpanel.Create(TabSheet);
+                Panel.DoubleBuffered := true;
+                Panel.Caption := '';
+                Panel.Align := alClient;
+                Panel.Parent :=  TabSheet;
+                Image := TImage.Create(Panel);
+                Image.Parent := Panel;
+                Image.Align := alClient;
                 Image.Picture.LoadFromFile(trim(Copy(linha,3,linha.Length)));
                 Image.OnClick := proximoLabel;
               end
@@ -103,12 +127,13 @@ begin
               begin
                 t := t + 1;
                 llabel := TLabel.Create(Image);
-                llabel.Font.Name := 'Permanent Marker';
-                llabel.Font.Color := clBlue;
+                llabel.Font.Name := 'Arial';
+                llabel.Font.Style := [fsBold];
+                llabel.Font.Color := clNavy;
                 llabel.Font.Size := StrToint(Copy(linha,1,2));
                 llabel.Top := i;
                 llabel.Left := 50;
-                llabel.Parent := TabSheet;
+                llabel.Parent := Panel;
                 llabel.Caption := Copy(linha,3,linha.Length);
                 if linha.EndsWith('+') then
                 begin
@@ -127,32 +152,32 @@ begin
           end;
          end;
      end;
-     PagQuadroBranco.ActivePageIndex := 1;
+
+     PagQuadroBranco.ActivePageIndex := 0;
    end;
-end;
-
-procedure TFrmQuadroBranco.BtnMinimizarClick(Sender: TObject);
-begin
-   FrmQuadroBranco.WindowState := wsMinimized;
-end;
-
-procedure TFrmQuadroBranco.BtnSairClick(Sender: TObject);
-begin
-  Application.Terminate;
 end;
 
 procedure TFrmQuadroBranco.FormCreate(Sender: TObject);
 begin
-    MemoConteudo.Lines.Clear;
     FrmQuadroBranco.Top := 0;
     FrmQuadroBranco.Height := 1040;
     FrmQuadroBranco.Width := 1000;
     arquivo := '';
 end;
 
+procedure TFrmQuadroBranco.Minimizar1Click(Sender: TObject);
+begin
+   FrmQuadroBranco.WindowState := wsMinimized;
+end;
+
 procedure TFrmQuadroBranco.proximoTab(Sender: TObject);
 begin
-  TTabsheet(TShape(Sender).Parent).PageControl.ActivePageIndex := TShape(Sender).Tag;
+  TTabsheet(TPanel(TImage(Sender).Parent).Parent).PageControl.SelectNextPage(true, false);
+end;
+
+procedure TFrmQuadroBranco.Sair1Click(Sender: TObject);
+begin
+  Application.Terminate;
 end;
 
 procedure TFrmQuadroBranco.proximoLabel(Sender: TObject);
@@ -179,17 +204,19 @@ begin
    if ((fim) and (alterou)) or (TImage(Sender).ComponentCount = 0)then
    begin
       proximo := Tlabel.Create(TTabsheet(TImage(Sender).Parent));
-      proximo.Font.Name := 'Permanent Marker';
+      proximo.Font.Name := 'Arial';
       proximo.Font.Color := clBlue;
       proximo.Font.Size := 20;
       proximo.Tag := TTabsheet(TImage(Sender).Parent).TabIndex + 1;
       proximo.Top := TImage(Sender).Height - 80;
 
       proximo.Parent := TTabsheet(TImage(Sender).Parent);
-      if (TTabsheet(TImage(Sender).Parent).TabIndex = TTabsheet(TImage(Sender).Parent).PageControl.PageCount - 1) then
+      if (TTabsheet(TPanel(TImage(Sender).Parent).Parent).TabIndex =
+          TTabsheet(TPanel(TImage(Sender).Parent).Parent).PageControl.PageCount - 1) then
       begin
         proximo.Left := TImage(Sender).Width - 90;
         proximo.Caption := 'Fim';
+        proximo.OnClick := proximoTab;
       end
       else
       begin
