@@ -58,6 +58,10 @@ object FrmQuadroBranco: TFrmQuadroBranco
       Caption = 'Minimizar'
       OnClick = Minimizar1Click
     end
+    object Abas1: TMenuItem
+      Caption = 'Abas'
+      OnClick = Abas1Click
+    end
     object N1: TMenuItem
       Caption = '-'
     end
