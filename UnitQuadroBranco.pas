@@ -101,7 +101,7 @@ var
   TabSheet: TTabSheet;
   Image : TImage;
   llabel, llabelSombra : Tlabel;
-  Panel : Tpanel;
+  Panel, PanelL: Tpanel;
 begin
    Panel := Tpanel.Create(self);
 
@@ -119,31 +119,15 @@ begin
      begin
          if not linha.IsEmpty  then
          begin
-           if linha.StartsWith('@') then
-           begin
-              i := 30;
-              TabSheet := TTabSheet.Create(PagQuadroBranco);
-              TabSheet.Caption := Copy(linha,2,linha.Length);
-              TabSheet.PageControl := PagQuadroBranco;
-              TabSheet.TabVisible := False;
-              TabSheet.BorderWidth := 0;
-              TabSheet.DoubleBuffered := True;
-              Panel := Tpanel.Create(TabSheet);
-              Panel.DoubleBuffered := true;
-              Panel.Align := alClient;
-              Panel.Parent := TabSheet;
-              Panel.Color := clGreen;
-              Panel.ParentBackground := False;
-              Panel.BorderWidth := 0;
-              Panel.BevelOuter:= bvNone;
-              Panel.BorderStyle := bsNone;
-              Panel.Tag := 0;
-              Panel.OnMouseDown := proximoTab;
-          end
-          else
-          begin
-              if linha.StartsWith('IM') then
-              begin
+             if linha.StartsWith('@') then
+             begin
+                i := 30;
+                TabSheet := TTabSheet.Create(PagQuadroBranco);
+                TabSheet.Caption := Copy(linha,2,linha.Length);
+                TabSheet.PageControl := PagQuadroBranco;
+                TabSheet.TabVisible := False;
+                TabSheet.BorderWidth := 0;
+                TabSheet.DoubleBuffered := True;
                 Panel := Tpanel.Create(TabSheet);
                 Panel.DoubleBuffered := true;
                 Panel.Align := alClient;
@@ -151,52 +135,81 @@ begin
                 Panel.Color := clGreen;
                 Panel.ParentBackground := False;
                 Panel.BorderWidth := 0;
-                Panel.BevelOuter := bvNone;
+                Panel.BevelOuter:= bvNone;
                 Panel.BorderStyle := bsNone;
-                Panel.Tag := 1;
+                Panel.Tag := 0;
                 Panel.OnMouseDown := proximoTab;
-                Image := TImage.Create(Panel);
-                Image.Parent := Panel;
-                Image.top := 0;
-                Image.Left := 0;
-                Image.AutoSize := true;
-                Image.Picture.LoadFromFile(trim(Copy(linha,3,linha.Length)));
-              end
-              else
-              begin
-                llabel := TLabel.Create(Panel);
-                llabel.Font.Name := 'Arial';
-                llabel.Font.Style := [fsBold];
-                llabel.Font.Color := clLime;
-                llabel.Font.Size := StrToint(Copy(linha,1,2));
-                llabel.Top := i;
-                llabel.Left := 50;
-                llabel.Parent := Panel;
-                llabel.Caption := Copy(linha,3,linha.Length);
-                if linha.EndsWith('+') then
+            end
+            else
+            begin
+                if linha.StartsWith('IM') then
                 begin
-                  llabel.Caption := Copy(linha,3,linha.Length-3);
-                  llabel.Tag := 1;
+                  Panel := Tpanel.Create(TabSheet);
+                  Panel.DoubleBuffered := true;
+                  Panel.Align := alClient;
+                  Panel.Parent := TabSheet;
+                  Panel.Color := clGreen;
+                  Panel.ParentBackground := False;
+                  Panel.BorderWidth := 0;
+                  Panel.BevelOuter := bvNone;
+                  Panel.BorderStyle := bsNone;
+                  Panel.Tag := 1;
+                  Panel.OnMouseDown := proximoTab;
+                  Image := TImage.Create(Panel);
+                  Image.Parent := Panel;
+                  Image.top := 0;
+                  Image.Left := 0;
+                  Image.AutoSize := true;
+                  Image.Picture.LoadFromFile(trim(Copy(linha,3,linha.Length)));
                 end
                 else
                 begin
+                  llabel := TLabel.Create(Panel);
+                  llabel.Font.Name := 'Arial';
+                  llabel.Font.Style := [fsBold];
+                  llabel.Font.Color := clLime;
+                  llabel.Font.Size := StrToint(Copy(linha,1,2));
+                  llabel.Top := i;
+                  llabel.Left := 50;
+                  llabel.Parent := Panel;
                   llabel.Caption := Copy(linha,3,linha.Length);
-                  llabel.Tag := 0;
-                end;
-                llabel.Visible := not (trim(llabel.Caption) = '');
-                llabel.Caption := llabel.Caption + ' ';
-                i := i + trunc(llabel.Font.Size*1.4);
+                  if linha.EndsWith('+') then
+                  begin
+                    llabel.Caption := Copy(linha,3,linha.Length-3);
+                    llabel.Tag := 1;
+                  end
+                  else
+                  begin
+                    llabel.Caption := Copy(linha,3,linha.Length);
+                    llabel.Tag := 0;
+                  end;
+                  llabel.Visible := not (trim(llabel.Caption) = '');
+                  llabel.Caption := llabel.Caption + ' ';
+                  i := i + trunc(llabel.Font.Size*1.4);
 
-                llabelSombra := TLabel.Create(Panel);
-                llabelSombra.Font := llabel.Font;
-                llabelSombra.Top := llabel.top + 4;
-                llabelSombra.left := llabel.left + 3;
-                llabelSombra.Font.Color := clGreen;
-                llabelSombra.caption := llabel.Caption;
-                llabelSombra.Parent := Panel;
-                llabelSombra.SendToBack;
-              end;
-          end;
+                  llabelSombra := TLabel.Create(Panel);
+                  llabelSombra.Font := llabel.Font;
+                  llabelSombra.Top := llabel.top + 4;
+                  llabelSombra.left := llabel.left + 3;
+                  llabelSombra.Font.Color := clGreen;
+                  llabelSombra.caption := llabel.Caption;
+                  llabelSombra.Parent := Panel;
+                  llabelSombra.SendToBack;
+                end;
+            end;
+
+            PanelL := TPanel.Create(TabSheet);
+            PanelL.Color := clGreen;
+            PanelL.ParentBackground := False;
+            PanelL.BorderWidth := 0;
+            PanelL.BevelOuter := bvNone;
+            PanelL.BorderStyle := bsNone;
+            PanelL.Align := AlTop;
+            PanelL.BringToFront;
+            PanelL.Height := 0;
+            PanelL.Tag := 2;
+            PanelL.DoubleBuffered := true;
+            PanelL.Parent := TabSheet;
          end;
      end;
 
@@ -221,11 +234,14 @@ end;
 
 procedure TFrmQuadroBranco.proximoTab(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
-  i, l : integer;
+  i, l, j : integer;
   fim : boolean;
   texto : string;
+  PanelL : Tpanel;
 
 begin
+  PanelL := nil;
+
   if Button = mbLeft then
   begin
   if Shift = [ssShift,ssLeft] then
@@ -233,6 +249,24 @@ begin
   else
     if TPanel(Sender).Tag = 1 then
     begin
+      for j:=0 to TTabsheet(TPanel(Sender).Parent).ComponentCount-1 do
+      begin
+         if TTabsheet(TPanel(Sender).Parent).Components[j].Tag = 2 then
+         begin
+           PanelL := Tpanel(TTabsheet(TPanel(Sender).Parent).Components[j]);
+           break;
+         end;
+      end;
+
+      if Assigned(PanelL) then
+      begin
+        while PanelL.Height < FrmQuadroBranco.Height do
+        begin
+          PanelL.Height := PanelL.Height + 3;
+          PanelL.Repaint;
+        end;
+      end;
+      TTabsheet(TPanel(Sender).Parent).Repaint;
       TTabsheet(TPanel(Sender).Parent).PageControl.SelectNextPage(true, false);
     end
     else
