@@ -33,8 +33,6 @@ type
     procedure Minimizar1Click(Sender: TObject);
     procedure Sair1Click(Sender: TObject);
     procedure Apresentar;
-   // procedure WMEraseBkgnd(var Message: TWMEraseBkgnd);
-   //   message WM_ERASEBKGND;
     procedure Abas1Click(Sender: TObject);
   private
     { Private declarations }
@@ -60,11 +58,6 @@ begin
   else
     InflateRect(PRect(Msg.LParam)^, -4, -4)
 end;
-
-//procedure TFrmQuadroBranco.WMEraseBkgnd(var Message: TWMEraseBkgnd);
-//begin
-//  Message.Result:=0;
-//end;
 
 procedure TFrmQuadroBranco.Abas1Click(Sender: TObject);
 var
@@ -104,6 +97,8 @@ var
   Panel, PanelL: Tpanel;
 begin
    Panel := Tpanel.Create(self);
+   PanelL := Tpanel.Create(self);
+   llabel := nil;
 
    if arquivo <> '' then
    begin
@@ -139,6 +134,22 @@ begin
                 Panel.BorderStyle := bsNone;
                 Panel.Tag := 0;
                 Panel.OnMouseDown := proximoTab;
+
+                PanelL := TPanel.Create(TabSheet);
+                PanelL.Visible := false;
+                PanelL.Color := ClGreen;
+                PanelL.ParentBackground := False;
+                PanelL.BorderWidth := 0;
+                PanelL.BevelOuter := bvNone;
+                PanelL.BorderStyle := bsNone;
+                PanelL.Top := 0;
+                PanelL.Left := 0;
+                PanelL.Width := Trunc((TabSheet.Width/3)*2);
+                PanelL.BringToFront;
+                PanelL.Height := 0;
+                PanelL.Tag := 2;
+                PanelL.DoubleBuffered := true;
+                PanelL.Parent := TabSheet;
             end
             else
             begin
@@ -198,21 +209,16 @@ begin
                 end;
             end;
 
-            PanelL := TPanel.Create(TabSheet);
-            PanelL.Color := clGreen;
-            PanelL.ParentBackground := False;
-            PanelL.BorderWidth := 0;
-            PanelL.BevelOuter := bvNone;
-            PanelL.BorderStyle := bsNone;
-            PanelL.Align := AlTop;
-            PanelL.BringToFront;
-            PanelL.Height := 0;
-            PanelL.Tag := 2;
-            PanelL.DoubleBuffered := true;
-            PanelL.Parent := TabSheet;
+            if not (llabel = nil) then
+            begin
+              PanelL.Height := llabel.Top + llabel.Height;
+            end
+            else
+            begin
+              PanelL.Height := TabSheet.Height;
+            end;
          end;
      end;
-
      PagQuadroBranco.ActivePageIndex := 0;
    end;
 end;
@@ -224,7 +230,7 @@ begin
     FrmQuadroBranco.Width := 1000;
     arquivo := '';
     corletra := clwhite;
-    corsombra := clBlack;
+    corsombra := clGray;
 end;
 
 procedure TFrmQuadroBranco.Minimizar1Click(Sender: TObject);
@@ -234,14 +240,14 @@ end;
 
 procedure TFrmQuadroBranco.proximoTab(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
-  i, l, j : integer;
+  i, l, j, h : integer;
   fim : boolean;
   texto : string;
   PanelL : Tpanel;
 
 begin
   PanelL := nil;
-
+  h := 0;
   if Button = mbLeft then
   begin
   if Shift = [ssShift,ssLeft] then
@@ -254,13 +260,16 @@ begin
          if TTabsheet(TPanel(Sender).Parent).Components[j].Tag = 2 then
          begin
            PanelL := Tpanel(TTabsheet(TPanel(Sender).Parent).Components[j]);
+           h := Tpanel(TTabsheet(TPanel(Sender).Parent).Components[j]).Height;
+           Tpanel(TTabsheet(TPanel(Sender).Parent).Components[j]).Height := 1;
+           Tpanel(TTabsheet(TPanel(Sender).Parent).Components[j]).Visible := true;
            break;
          end;
       end;
 
       if Assigned(PanelL) then
       begin
-        while PanelL.Height < FrmQuadroBranco.Height do
+        while PanelL.Height < h do
         begin
           PanelL.Height := PanelL.Height + 3;
           PanelL.Repaint;
@@ -268,6 +277,7 @@ begin
       end;
       TTabsheet(TPanel(Sender).Parent).Repaint;
       TTabsheet(TPanel(Sender).Parent).PageControl.SelectNextPage(true, false);
+      PanelL.Visible := false;
     end
     else
     begin
@@ -310,7 +320,7 @@ begin
               l := Tlabel(TPanel(Sender).Components[i]).Top;
 
               Tlabel(TPanel(Sender).Components[i]).Top := TPanel(Sender).Height + Tlabel(TPanel(Sender).Components[i]).Height + 5;
-              Tlabel(TPanel(Sender).Components[i+1]).Top := Tlabel(TPanel(Sender).Components[i]).Top + 4;
+              Tlabel(TPanel(Sender).Components[i+1]).Top := Tlabel(TPanel(Sender).Components[i]).Top + 6;
               Tlabel(TPanel(Sender).Components[i]).Font.Color := corletra;
               Tlabel(TPanel(Sender).Components[i+1]).Font.Color := corsombra;
 
