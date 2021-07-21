@@ -17,25 +17,37 @@ object FrmQuadroBranco: TFrmQuadroBranco
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object PagQuadroBranco: TPageControl
-    Left = 0
-    Top = 345
-    Width = 651
-    Height = 236
-    Align = alClient
-    MultiLine = True
-    TabOrder = 0
-  end
-  object MemoConteudo: TMemo
+  object Fundo: TPanel
     Left = 0
     Top = 0
     Width = 651
-    Height = 345
-    Align = alTop
-    Lines.Strings = (
-      'MemoConteudo')
-    TabOrder = 1
-    Visible = False
+    Height = 581
+    Align = alClient
+    BevelOuter = bvNone
+    Color = clGreen
+    ParentBackground = False
+    TabOrder = 0
+    object PagQuadroBranco: TPageControl
+      Left = 0
+      Top = 73
+      Width = 651
+      Height = 508
+      Align = alClient
+      MultiLine = True
+      TabOrder = 0
+      Visible = False
+    end
+    object MemoConteudo: TMemo
+      Left = 0
+      Top = 0
+      Width = 651
+      Height = 73
+      Align = alTop
+      Lines.Strings = (
+        'MemoConteudo')
+      TabOrder = 1
+      Visible = False
+    end
   end
   object OpenDialog: TOpenDialog
     FileName = '*.txt'

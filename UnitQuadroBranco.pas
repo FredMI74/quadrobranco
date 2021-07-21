@@ -15,7 +15,6 @@ type
   end;
 
   TFrmQuadroBranco = class(TForm)
-    PagQuadroBranco: TPageControl;
     OpenDialog: TOpenDialog;
     PopupMenu: TPopupMenu;
     Abrir1: TMenuItem;
@@ -23,21 +22,23 @@ type
     Minimizar1: TMenuItem;
     N1: TMenuItem;
     Sair1: TMenuItem;
-    MemoConteudo: TMemo;
     Abas1: TMenuItem;
+    Fundo: TPanel;
+    PagQuadroBranco: TPageControl;
+    MemoConteudo: TMemo;
     procedure FormCreate(Sender: TObject);
-    procedure proximoLabel(Sender: TObject);
-    procedure proximoTab(Sender: TObject);
+    procedure proximoTab(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure Abrir1Click(Sender: TObject);
     procedure Apresentar1Click(Sender: TObject);
     procedure Minimizar1Click(Sender: TObject);
     procedure Sair1Click(Sender: TObject);
     procedure Apresentar;
-    procedure WMEraseBkgnd(var Message: TWMEraseBkgnd);
-      message WM_ERASEBKGND;
+   // procedure WMEraseBkgnd(var Message: TWMEraseBkgnd);
+   //   message WM_ERASEBKGND;
     procedure Abas1Click(Sender: TObject);
   private
     { Private declarations }
+    corletra, corsombra : Tcolor;
     arquivo : string;
   public
     { Public declarations }
@@ -60,10 +61,10 @@ begin
     InflateRect(PRect(Msg.LParam)^, -4, -4)
 end;
 
-procedure TFrmQuadroBranco.WMEraseBkgnd(var Message: TWMEraseBkgnd);
-begin
-  Message.Result:=0;
-end;
+//procedure TFrmQuadroBranco.WMEraseBkgnd(var Message: TWMEraseBkgnd);
+//begin
+//  Message.Result:=0;
+//end;
 
 procedure TFrmQuadroBranco.Abas1Click(Sender: TObject);
 var
@@ -99,13 +100,14 @@ var
   linha : String;
   TabSheet: TTabSheet;
   Image : TImage;
-  llabel : Tlabel;
+  llabel, llabelSombra : Tlabel;
   Panel : Tpanel;
 begin
    Panel := Tpanel.Create(self);
 
    if arquivo <> '' then
    begin
+     PagQuadroBranco.Visible := true;
      MemoConteudo.Lines.LoadFromFile(OpenDialog.FileName);
      TabSheet := TTabSheet.Create(PagQuadroBranco);
      i := 0;
@@ -125,16 +127,18 @@ begin
               TabSheet.PageControl := PagQuadroBranco;
               TabSheet.TabVisible := False;
               TabSheet.BorderWidth := 0;
+              TabSheet.DoubleBuffered := True;
               Panel := Tpanel.Create(TabSheet);
               Panel.DoubleBuffered := true;
               Panel.Align := alClient;
               Panel.Parent := TabSheet;
-              Panel.Color := clGreen; // RGB(153, 255, 102);
+              Panel.Color := clGreen;
               Panel.ParentBackground := False;
               Panel.BorderWidth := 0;
               Panel.BevelOuter:= bvNone;
               Panel.BorderStyle := bsNone;
-              Panel.OnClick := proximoLabel;
+              Panel.Tag := 0;
+              Panel.OnMouseDown := proximoTab;
           end
           else
           begin
@@ -144,12 +148,13 @@ begin
                 Panel.DoubleBuffered := true;
                 Panel.Align := alClient;
                 Panel.Parent := TabSheet;
-                Panel.Color := clGreen; // RGB(153, 255, 102);
+                Panel.Color := clGreen;
                 Panel.ParentBackground := False;
                 Panel.BorderWidth := 0;
                 Panel.BevelOuter := bvNone;
                 Panel.BorderStyle := bsNone;
-                Panel.OnClick := proximoLabel;
+                Panel.Tag := 1;
+                Panel.OnMouseDown := proximoTab;
                 Image := TImage.Create(Panel);
                 Image.Parent := Panel;
                 Image.top := 0;
@@ -162,7 +167,7 @@ begin
                 llabel := TLabel.Create(Panel);
                 llabel.Font.Name := 'Arial';
                 llabel.Font.Style := [fsBold];
-                llabel.Font.Color := clNavy;
+                llabel.Font.Color := clLime;
                 llabel.Font.Size := StrToint(Copy(linha,1,2));
                 llabel.Top := i;
                 llabel.Left := 50;
@@ -178,9 +183,18 @@ begin
                   llabel.Caption := Copy(linha,3,linha.Length);
                   llabel.Tag := 0;
                 end;
-                llabel.Visible := trim(llabel.Caption) = '';
+                llabel.Visible := not (trim(llabel.Caption) = '');
                 llabel.Caption := llabel.Caption + ' ';
                 i := i + trunc(llabel.Font.Size*1.4);
+
+                llabelSombra := TLabel.Create(Panel);
+                llabelSombra.Font := llabel.Font;
+                llabelSombra.Top := llabel.top + 4;
+                llabelSombra.left := llabel.left + 3;
+                llabelSombra.Font.Color := clGreen;
+                llabelSombra.caption := llabel.Caption;
+                llabelSombra.Parent := Panel;
+                llabelSombra.SendToBack;
               end;
           end;
          end;
@@ -196,6 +210,8 @@ begin
     FrmQuadroBranco.Height := 1040;
     FrmQuadroBranco.Width := 1000;
     arquivo := '';
+    corletra := clwhite;
+    corsombra := clBlack;
 end;
 
 procedure TFrmQuadroBranco.Minimizar1Click(Sender: TObject);
@@ -203,58 +219,98 @@ begin
    FrmQuadroBranco.WindowState := wsMinimized;
 end;
 
-procedure TFrmQuadroBranco.proximoTab(Sender: TObject);
+procedure TFrmQuadroBranco.proximoTab(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  i, l : integer;
+  fim : boolean;
+  texto : string;
+
 begin
-  TTabsheet(TPanel(TLabel(Sender).Parent).Parent).PageControl.SelectNextPage(true, false);
+  if Button = mbLeft then
+  begin
+  if Shift = [ssShift,ssLeft] then
+     TTabsheet(TPanel(Sender).Parent).PageControl.SelectNextPage(false, false)
+  else
+    if TPanel(Sender).Tag = 1 then
+    begin
+      TTabsheet(TPanel(Sender).Parent).PageControl.SelectNextPage(true, false);
+    end
+    else
+    begin
+       fim := true;
+       i := 0;
+       while i <= TPanel(Sender).ComponentCount - 1  do
+       begin
+         if (TPanel(Sender).Components[i] is TLabel) and
+            (Tlabel(TPanel(Sender).Components[i]).Font.Color = clLime) and
+            (Tlabel(TPanel(Sender).Components[i]).Visible) then
+         begin
+           texto := Tlabel(TPanel(Sender).Components[i]).Caption;
+           if texto.StartsWith('>') then
+           begin
+              Delete(texto,1,1);
+              Tlabel(TPanel(Sender).Components[i]).Caption := texto;
+              Tlabel(TPanel(Sender).Components[i+1]).Caption := texto;
+
+              l := Tlabel(TPanel(Sender).Components[i]).Left;
+
+              Tlabel(TPanel(Sender).Components[i]).Left := Tlabel(TPanel(Sender).Components[i]).Left  - Tlabel(TPanel(Sender).Components[i]).Width - 50;
+              Tlabel(TPanel(Sender).Components[i+1]).Left := Tlabel(TPanel(Sender).Components[i]).Left + 3;
+              Tlabel(TPanel(Sender).Components[i]).Font.Color := corletra;
+              Tlabel(TPanel(Sender).Components[i+1]).Font.Color := corsombra;
+
+              while Tlabel(TPanel(Sender).Components[i]).Left < l do
+              begin
+                Tlabel(TPanel(Sender).Components[i]).Left := Tlabel(TPanel(Sender).Components[i]).Left + 5;
+                Tlabel(TPanel(Sender).Components[i+1]).Left := Tlabel(TPanel(Sender).Components[i]).Left + 3;
+                TPanel(Sender).Repaint;
+              end;
+           end
+           else
+           if texto.StartsWith('^') then
+           begin
+              Delete(texto,1,1);
+              Tlabel(TPanel(Sender).Components[i]).Caption := texto;
+              Tlabel(TPanel(Sender).Components[i+1]).Caption := texto;
+
+              l := Tlabel(TPanel(Sender).Components[i]).Top;
+
+              Tlabel(TPanel(Sender).Components[i]).Top := TPanel(Sender).Height + Tlabel(TPanel(Sender).Components[i]).Height + 5;
+              Tlabel(TPanel(Sender).Components[i+1]).Top := Tlabel(TPanel(Sender).Components[i]).Top + 4;
+              Tlabel(TPanel(Sender).Components[i]).Font.Color := corletra;
+              Tlabel(TPanel(Sender).Components[i+1]).Font.Color := corsombra;
+
+              while Tlabel(TPanel(Sender).Components[i]).Top > l do
+              begin
+                Tlabel(TPanel(Sender).Components[i]).top := Tlabel(TPanel(Sender).Components[i]).top - 10;
+                Tlabel(TPanel(Sender).Components[i+1]).top := Tlabel(TPanel(Sender).Components[i]).top + 4;
+                TPanel(Sender).Repaint;
+              end;
+           end
+           else
+           begin
+             Tlabel(TPanel(Sender).Components[i]).Font.Color := corletra;
+             Tlabel(TPanel(Sender).Components[i+1]).Font.Color := corsombra;
+           end;
+           fim := i = TPanel(Sender).ComponentCount - 2;
+           if Tlabel(TPanel(Sender).Components[i]).Tag = 0 then
+             break;
+         end;
+         i := i + 2;
+       end;
+
+       if (fim) or (TPanel(Sender).ComponentCount = 1) then
+       begin
+          TPanel(Sender).tag := 1;
+       end;
+    end;
+  end;
 end;
+
 
 procedure TFrmQuadroBranco.Sair1Click(Sender: TObject);
 begin
   Application.Terminate;
-end;
-
-procedure TFrmQuadroBranco.proximoLabel(Sender: TObject);
-var
-  i : integer;
-  fim, alterou : boolean;
-  proximo : Tlabel;
-begin
-   fim := true;
-   alterou := false;
-   for i := 0 to TPanel(Sender).ComponentCount - 1 do
-   begin
-     if (TPanel(Sender).Components[i] is TLabel) and
-        (not Tlabel(TPanel(Sender).Components[i]).Visible) then
-     begin
-       alterou := true;
-       Tlabel(TPanel(Sender).Components[i]).Visible := true;
-       fim := i = TPanel(Sender).ComponentCount - 1;
-       if Tlabel(TPanel(Sender).Components[i]).Tag = 0 then
-         break;
-     end;
-   end;
-
-   if ((fim) and (alterou)) or (TPanel(Sender).ComponentCount = 1)then
-   begin
-      proximo := Tlabel.Create(TPanel(Sender));
-      proximo.Font.Name := 'Arial';
-      proximo.Font.Color := clNavy;
-      proximo.Font.Size := 20;
-      proximo.AutoSize := True;
-      proximo.Top := TPanel(Sender).Height - 40;
-      proximo.Left := 20;
-      proximo.OnClick := proximoTab;
-      proximo.Parent := TPanel(Sender);
-      if (TTabsheet(TPanel(Sender).Parent).TabIndex =
-          TTabsheet(TPanel(Sender).Parent).PageControl.PageCount - 1) then
-      begin
-        proximo.Caption := 'Fim';
-      end
-      else
-      begin
-        proximo.Caption := 'Próximo';
-      end;
-   end;
 end;
 
 end.
