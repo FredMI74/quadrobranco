@@ -57,7 +57,7 @@ object FrmQuadroBranco: TFrmQuadroBranco
     Top = 48
   end
   object PopupMenu: TPopupMenu
-    Left = 312
+    Left = 328
     Top = 280
     object Abrir1: TMenuItem
       Caption = 'Abrir'

@@ -90,16 +90,18 @@ end;
 procedure TFrmQuadroBranco.Apresentar;
 var
   i : integer;
-  linha : String;
+  linha, fonte : String;
   TabSheet: TTabSheet;
   Image : TImage;
   llabel, llabelSombra : Tlabel;
   Panel, PanelL: Tpanel;
   imagem : boolean;
+
 begin
    Panel := Tpanel.Create(self);
    PanelL := Tpanel.Create(self);
    llabel := nil;
+   fonte := 'Verdana';
 
    if arquivo <> '' then
    begin
@@ -116,6 +118,11 @@ begin
          if not linha.IsEmpty  then
          begin
              imagem := false;
+             if linha.StartsWith('*') then
+             begin
+               fonte := Copy(linha,2,linha.Length);
+             end
+             else
              if linha.StartsWith('@') then
              begin
                 i := 30;
@@ -179,7 +186,7 @@ begin
                 else
                 begin
                   llabel := TLabel.Create(Panel);
-                  llabel.Font.Name := 'Arial';
+                  llabel.Font.Name := fonte;
                   llabel.Font.Style := [fsBold];
                   llabel.Font.Color := clLime;
                   llabel.Font.Size := StrToint(Copy(linha,1,2));
@@ -199,7 +206,7 @@ begin
                   end;
                   llabel.Visible := not (trim(llabel.Caption) = '');
                   llabel.Caption := llabel.Caption + ' ';
-                  i := i + trunc(llabel.Font.Size*1.4);
+                  i := i + trunc(llabel.Font.Size*1.5);
 
                   llabelSombra := TLabel.Create(Panel);
                   llabelSombra.Font := llabel.Font;
