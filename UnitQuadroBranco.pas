@@ -95,6 +95,7 @@ var
   Image : TImage;
   llabel, llabelSombra : Tlabel;
   Panel, PanelL: Tpanel;
+  imagem : boolean;
 begin
    Panel := Tpanel.Create(self);
    PanelL := Tpanel.Create(self);
@@ -114,6 +115,7 @@ begin
      begin
          if not linha.IsEmpty  then
          begin
+             imagem := false;
              if linha.StartsWith('@') then
              begin
                 i := 30;
@@ -172,6 +174,7 @@ begin
                   Image.Left := 0;
                   Image.AutoSize := true;
                   Image.Picture.LoadFromFile(trim(Copy(linha,3,linha.Length)));
+                  imagem := true;
                 end
                 else
                 begin
@@ -206,16 +209,18 @@ begin
                   llabelSombra.caption := llabel.Caption;
                   llabelSombra.Parent := Panel;
                   llabelSombra.SendToBack;
+                  imagem := false;
                 end;
             end;
 
-            if not (llabel = nil) then
+            if imagem then
             begin
-              PanelL.Height := llabel.Top + llabel.Height;
+              PanelL.Height := TabSheet.Height;
             end
             else
             begin
-              PanelL.Height := TabSheet.Height;
+            if not (llabel = nil) then
+              PanelL.Height := llabel.Top + llabel.Height;
             end;
          end;
      end;
@@ -260,9 +265,10 @@ begin
          if TTabsheet(TPanel(Sender).Parent).Components[j].Tag = 2 then
          begin
            PanelL := Tpanel(TTabsheet(TPanel(Sender).Parent).Components[j]);
-           h := Tpanel(TTabsheet(TPanel(Sender).Parent).Components[j]).Height;
-           Tpanel(TTabsheet(TPanel(Sender).Parent).Components[j]).Height := 1;
-           Tpanel(TTabsheet(TPanel(Sender).Parent).Components[j]).Visible := true;
+           PanelL.BringToFront;
+           h := PanelL.Height;
+           PanelL.Height := 1;
+           PanelL.Visible := true;
            break;
          end;
       end;
