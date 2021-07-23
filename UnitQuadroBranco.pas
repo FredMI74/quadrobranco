@@ -89,7 +89,7 @@ end;
 
 procedure TFrmQuadroBranco.Apresentar;
 var
-  i : integer;
+  i,j : integer;
   linha, fonte : String;
   TabSheet: TTabSheet;
   Image : TImage;
@@ -125,6 +125,17 @@ begin
              else
              if linha.StartsWith('@') then
              begin
+                if Panel <> nil then
+                begin
+                  for j := Panel.ComponentCount -1 downto 0 do
+                  begin
+                     if (Panel.Components[j] is TLabel) then
+                     begin
+                        TLabel(Panel.Components[j]).BringToFront;
+                     end;
+                  end;
+                end;
+
                 i := 30;
                 TabSheet := TTabSheet.Create(PagQuadroBranco);
                 TabSheet.Caption := Copy(linha,2,linha.Length);
@@ -318,9 +329,11 @@ begin
 
               while Tlabel(TPanel(Sender).Components[i]).Left < l do
               begin
-                Tlabel(TPanel(Sender).Components[i]).Left := Tlabel(TPanel(Sender).Components[i]).Left + 5;
+                Tlabel(TPanel(Sender).Components[i]).Left := Tlabel(TPanel(Sender).Components[i]).Left + 2;
                 Tlabel(TPanel(Sender).Components[i+1]).Left := Tlabel(TPanel(Sender).Components[i]).Left + 3;
-                TPanel(Sender).Repaint;
+                Tlabel(TPanel(Sender).Components[i]).Repaint;
+                Tlabel(TPanel(Sender).Components[i+1]).Repaint;
+                Application.ProcessMessages;
               end;
            end
            else
@@ -339,9 +352,11 @@ begin
 
               while Tlabel(TPanel(Sender).Components[i]).Top > l do
               begin
-                Tlabel(TPanel(Sender).Components[i]).top := Tlabel(TPanel(Sender).Components[i]).top - 10;
+                Tlabel(TPanel(Sender).Components[i]).top := Tlabel(TPanel(Sender).Components[i]).top - 2;
                 Tlabel(TPanel(Sender).Components[i+1]).top := Tlabel(TPanel(Sender).Components[i]).top + 4;
-                TPanel(Sender).Repaint;
+                Tlabel(TPanel(Sender).Components[i]).Repaint;
+                Tlabel(TPanel(Sender).Components[i+1]).Repaint;
+
               end;
            end
            else
