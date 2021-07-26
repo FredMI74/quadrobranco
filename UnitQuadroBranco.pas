@@ -118,9 +118,19 @@ begin
          if not linha.IsEmpty  then
          begin
              imagem := false;
-             if linha.StartsWith('*') then
+             if linha.StartsWith('*F') then
              begin
-               fonte := Copy(linha,2,linha.Length);
+               fonte := Copy(linha,3,linha.Length);
+             end
+             else
+             if linha.StartsWith('*C') then
+             begin
+               corletra := StringToColor(Copy(linha,3,linha.Length));
+             end
+             else
+             if linha.StartsWith('*S') then
+             begin
+               corsombra :=  StringToColor(Copy(linha,3,linha.Length));
              end
              else
              if linha.StartsWith('@') then
